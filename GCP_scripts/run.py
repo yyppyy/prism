@@ -15,33 +15,37 @@ workload_dir = '/home/yanpeng/GCP_gem5/workloads/ycsb_workloads/'
 log_dir_dir = 'log/'
 result_dir_dir = 'result/'
 
-# workloads = {
-#     'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
-#     'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
-# }
 workloads = {
-    'kvs' : ['run_workloada.dat', ],
+    'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
+    # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
 }
+# workloads = {
+    # 'kvs' : ['run_workloada.dat', ],
+# }
 
 num_threads_per_nodess = [8, ]
+# num_threads_per_nodess = [8, ]
 
-# num_nodess = [16, ]
-num_nodess = [1, ]
+# num_nodess = [12, ]
+num_nodess = [16, 12, 8, 4, 1]
+# num_nodess = [1, ]
 
 num_lockss = [1000, ]
 
-# lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_soul_pthread', 'cohort_rw_spin_mutex', 'mcs']
-lock_types = ['pthread_mutex', ]
+lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_rw_spin_mutex', 'mcs', 'pthread_mutex']
+# lock_types = ['pthread_mutex', ]
+# lock_types = ['pthread_rwlock_prefer_w', ]
 
 warmup_iters = 0
 
-# num_iters = 10000
-num_iters = 100
+num_iters = 1000
+# num_iters = 20000
 
 req_interval = 0
 load_file = '/'
 rmax = 0
 wmax = 0
+prism_rw_batch = 100 # defaul 100
 
 if __name__ == "__main__":
     for app in workloads:
@@ -57,8 +61,8 @@ if __name__ == "__main__":
                             result_dir = result_dir_dir + run_id
                             print(result_dir)
                             os.system('mkdir -p %s' % result_dir)
-                            # cmd = '../../../build/bin/prism --backend=stgen -ltextv2 --executable='
-                            cmd = '../../../build/bin/prism --backend=stgen --executable='
+                            cmd = '../../../build/bin/prism --backend=stgen -ltextv2 -c %d --executable=' % prism_rw_batch
+                            # cmd = '../../../build/bin/prism --backend=stgen --executable='
                             gcp_cmd = ' '.join((bin_file, str(num_nodes), str(num_threads_per_nodes), str(num_locks),
                                         lock_type, log_dir, str(warmup_iters), str(num_iters), str(req_interval),
                                         load_file, run_file, str(rmax), str(wmax)))

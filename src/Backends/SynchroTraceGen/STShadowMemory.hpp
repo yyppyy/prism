@@ -12,7 +12,7 @@ namespace STGen
 {
 
 constexpr TID SO_UNDEF = -1;
-constexpr TID MAX_THREADS = 128;
+constexpr TID MAX_THREADS = 256;
 static_assert((MAX_THREADS > 0) && !(MAX_THREADS & (MAX_THREADS-1)),
               "MAX_THREADS must be a power of 2");
 
