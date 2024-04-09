@@ -9,7 +9,7 @@ def in_shmem_ranges(addr, shmem_ranges):
             return True
     return False
 
-def process_line(line, profile_enabled, shmem_ranges):
+def process_line(line, profile_enabled, shmem_ranges, indicatorsaddr2val, start_convert_spinlock_to_indicator, lock_acc_addrs, preserve_futex):
     """
     Modify or delete a line.
     Return the modified line, or None to delete the line.
@@ -24,10 +24,22 @@ def process_line(line, profile_enabled, shmem_ranges):
     is_barrier = False
     if '5^' in line:
         is_barrier = True
-    if (not '^' in line) and (not '#' in line) and (not profile_enabled):
+    if '9^' in line:
+        indicator = int(line[line.find('0x') + 2:], 16)
+        line = '! %d0%d\n' % (lock_acc_addrs[0], indicatorsaddr2val[indicator])
+        lock_acc_addrs.pop(0)
+        start_convert_spinlock_to_indicator = True
+    elif '10^' in line:
+        if start_convert_spinlock_to_indicator:
+            indicator = int(line[line.find('0x') + 2:], 16)
+            line = '! %d1%d\n' % (lock_acc_addrs[0], indicatorsaddr2val[indicator])
+            lock_acc_addrs.pop(0)
+        else:
+            line = None
+    elif (not '^' in line) and (not '#' in line) and (not profile_enabled):
         line = None
-    # elif '#' in line:
-        # line = None
+    elif '#' in line and (not preserve_futex):
+        line = None
     elif ('@' in line):
         parts = line.strip().split()
         if len(parts) <= 3:
@@ -36,7 +48,7 @@ def process_line(line, profile_enabled, shmem_ranges):
             addr = int(parts[3][2:], 16)
             if not in_shmem_ranges(addr, shmem_ranges):
                 line = None
-    return line, is_barrier  # Return the line unmodified by default
+    return line, is_barrier, start_convert_spinlock_to_indicator  # Return the line unmodified by default
 
 def process_directory(directory):
     # Backup the directory
@@ -59,28 +71,88 @@ def process_directory(directory):
                 start_addr = int(start_addr, 16)
                 end_addr = int(end_addr, 16)
                 shmem_ranges.append((start_addr, end_addr))
-        
+                        
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith('.gz'):
                 gz_file_path = os.path.join(root, file)
-                process_gz_file(gz_file_path, shmem_ranges)
+                process_gz_file(gz_file_path, shmem_ranges, directory)
 
-def process_gz_file(gz_file_path, shmem_ranges):
+def process_gz_file(gz_file_path, shmem_ranges, directory):
+    
+    lock_acc_addrs = []
+    with open(directory + '/lock_acc_addr/' + gz_file_path[gz_file_path.find('sigil.events.out-')+17:gz_file_path.find('.gz')], 'r') as file:
+        for line in file:
+            for _ in range(4): # lock begin, lock end, unlock begin, unlock end
+                lock_acc_addrs.append(int(line))
     
     profile_enabled = False
     # Temporary file to store modifications
     temp_file_path = gz_file_path + ".tmp"
+    is_read_only = (directory.find('workloadc') != -1)
+    # preserve_futex = (directory.find('pthread_rwlock_prefer_w') != -1)
+    preserve_futex = False
     
+    indicators = set()
+    # print(gz_file_path)
+    with gzip.open(gz_file_path, 'rt') as gz_file:
+        for line in gz_file:
+            # print(line)
+            if '9^' in line:
+                # print(line)
+                indicators.add(int(line[line.find('0x') + 2:], 16))
+                if len(indicators) >= (2 if is_read_only else 4):
+                    break
+           
+    indicatorsaddr2val = {}
+    indicators = sorted([_ for _ in indicators])
+    
+    if directory.find('mcs') == -1:
+        if not is_read_only:
+            rl = indicators[0]
+            wl = indicators[1]
+            ru = indicators[2]
+            wu = indicators[3]
+            indicatorsaddr2val[rl] = 0
+            indicatorsaddr2val[wl] = 1
+            indicatorsaddr2val[ru] = 2
+            indicatorsaddr2val[wu] = 3
+        else:
+            rl = indicators[0]
+            ru = indicators[1]
+            indicatorsaddr2val[rl] = 0
+            indicatorsaddr2val[ru] = 2
+    else:
+        if not is_read_only:
+            rl = indicators[0]
+            wl = indicators[1]
+            ru = indicators[2]
+            wu = indicators[3]
+            indicatorsaddr2val[rl] = 1
+            indicatorsaddr2val[wl] = 1
+            indicatorsaddr2val[ru] = 3
+            indicatorsaddr2val[wu] = 3
+        else:
+            rl = indicators[0]
+            ru = indicators[1]
+            indicatorsaddr2val[rl] = 1
+            indicatorsaddr2val[ru] = 3
+                 
+    # print(indicatorsaddr2val)
+
     # Open the original .gz file and a temporary file for output
+    start_convert_spinlock_to_indicator = False
     with gzip.open(gz_file_path, 'rt') as gz_file, gzip.open(temp_file_path, 'wt') as temp_file:
         for line in gz_file:
-            modified_line, is_barrier = process_line(line, profile_enabled, shmem_ranges)
+            modified_line, is_barrier, s = process_line(line, profile_enabled, shmem_ranges, indicatorsaddr2val, start_convert_spinlock_to_indicator, lock_acc_addrs, preserve_futex)
+            start_convert_spinlock_to_indicator = s
             if is_barrier:
                 profile_enabled = not profile_enabled
             # Write the modified line to temp file if not deleted
             if modified_line is not None:
                 temp_file.write(modified_line)
+    
+    assert(len(lock_acc_addrs) == 0)
     
     # Replace the original file with the modified temp file
     os.replace(temp_file_path, gz_file_path)
@@ -106,6 +178,9 @@ workloads = {
 # workloads = {
 #     'kvs' : ['run_workloada.dat', ],
 # }
+# workloads = {
+#     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
+# }
 
 num_threads_per_nodess = [8, ]
 # num_threads_per_nodess = [8, ]
@@ -114,15 +189,15 @@ num_threads_per_nodess = [8, ]
 num_nodess = [16, 8, 4, 2, 1]
 # num_nodess = [1, ]
 
-lock_types = [
-            'pthread_rwlock_prefer_w',
-              'percpu',
-              'cohort_rw_spin_mutex',
-              'mcs',
-              'pthread_mutex'
-              ]
+# lock_types = [
+#             'pthread_rwlock_prefer_w',
+#               'percpu',
+#               'cohort_rw_spin_mutex',
+#               'mcs',
+#             #   'pthread_mutex'
+#               ]
 # lock_types = ['pthread_mutex', ]
-# lock_types = ['pthread_rwlock_prefer_w', ]
+lock_types = ['pthread_rwlock_prefer_w', ]
 # lock_types = ['mcs', ]
 # lock_types = ['cohort_rw_spin_mutex', ]
 

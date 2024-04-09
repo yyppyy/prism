@@ -22,6 +22,9 @@ workloads = {
 # workloads = {
 #     'kvs' : ['run_workloada.dat', ],
 # }
+# workloads = {
+#     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
+# }
 
 num_threads_per_nodess = [8, ]
 # num_threads_per_nodess = [8, ]
@@ -30,11 +33,13 @@ num_threads_per_nodess = [8, ]
 num_nodess = [16, 8, 4, 2, 1]
 # num_nodess = [1, ]
 
-num_lockss = [100, ]
+num_lockss = [800, ]
 
-lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_rw_spin_mutex', 'mcs', 'pthread_mutex']
+# lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_rw_spin_mutex', 'mcs',
+#             #   'pthread_mutex'
+#               ]
 # lock_types = ['pthread_mutex', ]
-# lock_types = ['pthread_rwlock_prefer_w', ]
+lock_types = ['pthread_rwlock_prefer_w', ]
 # lock_types = ['mcs', ]
 # lock_types = ['percpu', ]
 # lock_types = ['cohort_rw_spin_mutex', ]
@@ -62,7 +67,17 @@ if __name__ == "__main__":
                             log_dir = log_dir_dir + run_id
                             result_dir = result_dir_dir + run_id
                             print(result_dir)
+                            
                             mem_addr_file = 'mem_meta.txt'
+                            lock_acc_addr_dir = 'lock_acc_addr/'
+                            
+                            os.system('cd %s && mkdir -p %s' % (result_dir, lock_acc_addr_dir))
+                            lock_acc_addr_printer_cmd = ' '.join((bin_file + '_lock_acc_addr', str(num_nodes), str(num_threads_per_nodes), str(num_locks),
+                                        lock_type, log_dir, str(warmup_iters), str(num_iters), str(req_interval),
+                                        result_dir + '/' + lock_acc_addr_dir, run_file, str(rmax), str(wmax)))
+                            # print(lock_acc_addr_printer_cmd)
+                            os.system(lock_acc_addr_printer_cmd)
+                            
                             os.system('mkdir -p %s' % result_dir)
                             cmd = '../../../build/bin/prism --backend=stgen -ltextv2 -c %d --executable=' % prism_rw_batch
                             # cmd = '../../../build/bin/prism --backend=stgen --executable='
