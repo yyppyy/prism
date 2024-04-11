@@ -52,6 +52,15 @@ def process_directory(directory):
     from_directory = directory.replace('gcp', from_lock_type)
     # print(from_directory)
     # return
+    lock_base_addr = 0
+    with open(from_directory + '/mem_meta.txt', 'r') as file:
+        for line in file:
+            if 'locks' in line:
+                parts = line.strip().split()
+                if len(parts) == 3:
+                    lock_base_addr_str, _, _ = parts
+                    lock_base_addr = int(lock_base_addr_str, 16)
+                    break
                         
     for root, dirs, files in os.walk(from_directory):
         for file in files:
@@ -59,13 +68,13 @@ def process_directory(directory):
                 from_gz_file_path = os.path.join(root, file)
                 gz_file_path = from_gz_file_path.replace(from_lock_type, 'gcp')
                 # print(from_gz_file_path, gz_file_path)
-                process_gz_file(from_gz_file_path, gz_file_path)
+                process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr)
             elif file.endswith('.out'):
                 from_out_file_path = os.path.join(root, file)
                 out_file_path = from_out_file_path.replace(from_lock_type, 'gcp')
                 os.system('cp %s %s' % (from_out_file_path, out_file_path))
 
-def process_gz_file(from_gz_file_path, gz_file_path):
+def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr):
     in_lock_op = False
     with gzip.open(from_gz_file_path, 'rt') as from_gz_file, gzip.open(gz_file_path, 'wt') as gz_file:
         for line in from_gz_file:
@@ -77,6 +86,11 @@ def process_gz_file(from_gz_file_path, gz_file_path):
                 elif rwlock_code == '1':
                     in_lock_op = False
                     modified_line = line[:-3] + '2' + line[-2:]
+                    rwlock_code = int(modified_line[2:])
+                    lock_acc_addr = rwlock_code // 100
+                    rwlock_indicator = rwlock_code % 100
+                    lock_acc_addr = lock_base_addr + 4096 * lock_acc_addr
+                    modified_line = '! ' + str(lock_acc_addr * 100 + rwlock_indicator) + '\n'
                 else:
                     assert False
             if in_lock_op == True:
