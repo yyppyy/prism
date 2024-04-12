@@ -15,13 +15,13 @@ workload_dir = '/home/yanpeng/GCP_gem5/workloads/ycsb_workloads/'
 log_dir_dir = 'log/'
 result_dir_dir = 'result/'
 
-workloads = {
-    'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
-    # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
-}
 # workloads = {
-#     'kvs' : ['run_workloada.dat', ],
+#     'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
+#     # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
 # }
+workloads = {
+    'kvs' : ['run_workloada.dat', ],
+}
 # workloads = {
 #     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
 # }
@@ -30,16 +30,16 @@ num_threads_per_nodess = [8, ]
 # num_threads_per_nodess = [8, ]
 
 # num_nodess = [16, ]
-num_nodess = [16, 8, 4, 2, 1]
-# num_nodess = [1, ]
+# num_nodess = [16, 8, 4, 2, 1]
+num_nodess = [4, ]
 
-num_lockss = [800, ]
+num_lockss = [80, ]
 
-# lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_rw_spin_mutex', 'mcs',
-#             #   'pthread_mutex'
-#               ]
+lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_rw_spin_mutex', 'mcs',
+            #   'pthread_mutex'
+              ]
 # lock_types = ['pthread_mutex', ]
-lock_types = ['pthread_rwlock_prefer_w', ]
+# lock_types = ['pthread_rwlock_prefer_w', ]
 # lock_types = ['mcs', ]
 # lock_types = ['percpu', ]
 # lock_types = ['cohort_rw_spin_mutex', ]
