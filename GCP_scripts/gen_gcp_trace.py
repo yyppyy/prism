@@ -53,6 +53,8 @@ def process_directory(directory):
     # print(from_directory)
     # return
     lock_base_addr = 0
+    hot_bucket_begin_addr = 0
+    hot_bucket_end_addr = 0
     with open(from_directory + '/mem_meta.txt', 'r') as file:
         for line in file:
             if 'locks' in line:
@@ -60,7 +62,12 @@ def process_directory(directory):
                 if len(parts) == 3:
                     lock_base_addr_str, _, _ = parts
                     lock_base_addr = int(lock_base_addr_str, 16)
-                    break
+            elif 'test_mem' in line:
+                parts = line.strip().split()
+                hot_bucket_begin_addr = parts[0]
+                hot_bucket_begin_addr = int(hot_bucket_begin_addr, 16)
+                hot_bucket_end_addr = parts[1]
+                hot_bucket_end_addr = int(hot_bucket_end_addr, 16)
                         
     for root, dirs, files in os.walk(from_directory):
         for file in files:
@@ -68,13 +75,13 @@ def process_directory(directory):
                 from_gz_file_path = os.path.join(root, file)
                 gz_file_path = from_gz_file_path.replace(from_lock_type, 'gcp')
                 # print(from_gz_file_path, gz_file_path)
-                process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr)
+                process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_begin_addr, hot_bucket_end_addr)
             elif file.endswith('.out'):
                 from_out_file_path = os.path.join(root, file)
                 out_file_path = from_out_file_path.replace(from_lock_type, 'gcp')
                 os.system('cp %s %s' % (from_out_file_path, out_file_path))
 
-def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr):
+def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_begin_addr, hot_bucket_end_addr):
     in_lock_op = False
     with gzip.open(from_gz_file_path, 'rt') as from_gz_file, gzip.open(gz_file_path, 'wt') as gz_file:
         for line in from_gz_file:
@@ -95,6 +102,12 @@ def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr):
                     assert False
             if in_lock_op == True:
                 modified_line = None
+            elif '@' in line:
+                parts = line.strip().split()
+                mem_acc_addr = int(parts[3][2:], 16)
+                if mem_acc_addr >= hot_bucket_begin_addr \
+                    and mem_acc_addr < hot_bucket_end_addr:
+                    modified_line = '! 9999\n'
             if modified_line is not None:
                 gz_file.write(modified_line)
         
