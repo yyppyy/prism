@@ -6,8 +6,8 @@ import multiprocessing
 root_path = '/home/yanpeng/GCP_gem5/prism/GCP_scripts/result/'
 
 workloads = {
-    'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
-    # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
+    # 'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
+    'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
 }
 # workloads = {
 #     'kvs' : ['run_workloada.dat', ],
@@ -62,12 +62,12 @@ def process_directory(directory):
                 if len(parts) == 3:
                     lock_base_addr_str, _, _ = parts
                     lock_base_addr = int(lock_base_addr_str, 16)
-            elif 'test_mem' in line:
-                parts = line.strip().split()
-                hot_bucket_begin_addr = parts[0]
-                hot_bucket_begin_addr = int(hot_bucket_begin_addr, 16)
-                hot_bucket_end_addr = parts[1]
-                hot_bucket_end_addr = int(hot_bucket_end_addr, 16)
+            # elif 'test_mem' in line:
+            #     parts = line.strip().split()
+            #     hot_bucket_begin_addr = parts[0]
+            #     hot_bucket_begin_addr = int(hot_bucket_begin_addr, 16)
+            #     hot_bucket_end_addr = parts[1]
+            #     hot_bucket_end_addr = int(hot_bucket_end_addr, 16)
                         
     for root, dirs, files in os.walk(from_directory):
         for file in files:
@@ -102,12 +102,12 @@ def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_
                     assert False
             if in_lock_op == True:
                 modified_line = None
-            elif '@' in line:
-                parts = line.strip().split()
-                mem_acc_addr = int(parts[3][2:], 16)
-                if mem_acc_addr >= hot_bucket_begin_addr \
-                    and mem_acc_addr < hot_bucket_end_addr:
-                    modified_line = '! 9999\n'
+            # elif '@' in line:
+            #     parts = line.strip().split()
+            #     mem_acc_addr = int(parts[3][2:], 16)
+            #     if mem_acc_addr >= hot_bucket_begin_addr \
+            #         and mem_acc_addr < hot_bucket_end_addr:
+            #         modified_line = '! 9999\n'
             if modified_line is not None:
                 gz_file.write(modified_line)
         
