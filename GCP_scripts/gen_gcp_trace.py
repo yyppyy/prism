@@ -19,8 +19,8 @@ workloads = {
 num_threads_per_nodess = [1, ]
 # num_threads_per_nodess = [8, ]
 
-# num_nodess = [16, ]
-num_nodess = [16, 8, 4, 2]
+num_nodess = [16, ]
+# num_nodess = [16, 8, 4, 2]
 # num_nodess = [4, ]
 
 num_lockss = [1, ]
@@ -102,12 +102,12 @@ def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_
                     assert False
             if in_lock_op == True:
                 modified_line = None
-            elif '@' in line:
-                parts = line.strip().split()
-                mem_acc_addr = int(parts[3][2:], 16)
-                if mem_acc_addr >= hot_bucket_begin_addr \
-                    and mem_acc_addr < hot_bucket_end_addr:
-                    modified_line = '! 9999\n'
+            # elif '@' in line:
+            #     parts = line.strip().split()
+            #     mem_acc_addr = int(parts[3][2:], 16)
+            #     if mem_acc_addr >= hot_bucket_begin_addr \
+            #         and mem_acc_addr < hot_bucket_end_addr:
+            #         modified_line = '! 9999\n'
             if modified_line is not None:
                 gz_file.write(modified_line)
         

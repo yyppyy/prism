@@ -29,8 +29,8 @@ workloads = {
 num_threads_per_nodess = [1, ]
 # num_threads_per_nodess = [8, ]
 
-# num_nodess = [16, ]
-num_nodess = [16, 8, 4, 2]
+num_nodess = [16, ]
+# num_nodess = [16, 8, 4, 2]
 # num_nodess = [1, ]
 
 num_lockss = [1, ]
@@ -39,8 +39,8 @@ num_lockss = [1, ]
 #             #   'pthread_mutex'
 #               ]
 # lock_types = ['pthread_mutex' ]
-# lock_types = ['pthread_rwlock_prefer_w', ]
-lock_types = ['mcs', ]
+lock_types = ['pthread_rwlock_prefer_w', ]
+# lock_types = ['mcs', ]
 # lock_types = ['percpu', ]
 # lock_types = ['cohort_rw_spin_mutex', ]
 
