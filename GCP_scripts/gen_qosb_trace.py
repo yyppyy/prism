@@ -6,26 +6,22 @@ import multiprocessing
 root_path = '/home/yanpeng/GCP_gem5/prism/GCP_scripts/result/'
 
 workloads = {
-    # 'bench' : ['0.0', '0.5', '0.95', '0.99'],
+    'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
     # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
-    'kvs': ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
 }
 # workloads = {
-#     'bench' : ['0.0', ],
+#     'kvs' : ['run_workloada.dat', ],
 # }
 # workloads = {
 #     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
 # }
 
-# num_threads_per_nodess = [1, ]
 num_threads_per_nodess = [8, ]
+# num_threads_per_nodess = [8, ]
 
-# num_nodess = [16, ]
-# num_nodess = [16, 8, 4, 2]
+# num_nodess = [12, ]
 num_nodess = [16, 8, 4, 2, 1]
-# num_nodess = [4, ]
-
-num_lockss = [1, ]
+# num_nodess = [1, ]
 
 # lock_types = [
 #             'pthread_rwlock_prefer_w',
@@ -98,8 +94,10 @@ def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_
                     in_lock_op = False
                     modified_line = line[:-3] + '2' + line[-2:]
                     rwlock_code = int(modified_line[2:])
+                    lock_acc_addr = rwlock_code // 100
                     rwlock_indicator = rwlock_code % 100
-                    modified_line = '! ' + str(lock_base_addr * 100 + rwlock_indicator) + '\n'
+                    lock_acc_addr = lock_base_addr + 4096 * lock_acc_addr
+                    modified_line = '! ' + str(lock_acc_addr * 100 + rwlock_indicator) + '\n'
                 else:
                     assert False
             if in_lock_op == True:
