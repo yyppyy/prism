@@ -6,8 +6,9 @@ import multiprocessing
 root_path = '/home/yanpeng/GCP_gem5/prism/GCP_scripts/result/'
 
 workloads = {
-    'bench' : ['0.0', '0.5', '0.95', '0.99'],
+    # 'bench' : ['0.0', '0.5', '0.95', '0.99'],
     # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
+    'kvs': ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
 }
 # workloads = {
 #     'bench' : ['0.0', ],
@@ -16,11 +17,12 @@ workloads = {
 #     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
 # }
 
-num_threads_per_nodess = [1, ]
-# num_threads_per_nodess = [8, ]
+# num_threads_per_nodess = [1, ]
+num_threads_per_nodess = [8, ]
 
-num_nodess = [16, ]
+# num_nodess = [16, ]
 # num_nodess = [16, 8, 4, 2]
+num_nodess = [16, 8, 4, 2, 1]
 # num_nodess = [4, ]
 
 num_lockss = [1, ]
