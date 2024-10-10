@@ -37,7 +37,7 @@ from_lock_type = 'pthread_rwlock_prefer_w'
 # lock_types = ['mcs', ]
 # lock_types = ['cohort_rw_spin_mutex', ]
 
-def process_directory(directory):
+def process_directory(directory, to_lock_type):
     # Backup the directory
     # parent_dir = os.path.dirname(directory)
     # backup_dir = parent_dir + '/' + os.path.basename(directory) + "_backup"
@@ -51,7 +51,7 @@ def process_directory(directory):
     # Process .gz files in the directory
     os.system('mkdir -p %s' % directory)
     
-    from_directory = directory.replace('gcp', from_lock_type)
+    from_directory = directory.replace(to_lock_type, from_lock_type)
     # print(from_directory)
     # return
     lock_base_addr = 0
@@ -75,12 +75,12 @@ def process_directory(directory):
         for file in files:
             if file.endswith('.gz'):
                 from_gz_file_path = os.path.join(root, file)
-                gz_file_path = from_gz_file_path.replace(from_lock_type, 'gcp')
+                gz_file_path = from_gz_file_path.replace(from_lock_type, to_lock_type)
                 # print(from_gz_file_path, gz_file_path)
                 process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_begin_addr, hot_bucket_end_addr)
             elif file.endswith('.out'):
                 from_out_file_path = os.path.join(root, file)
-                out_file_path = from_out_file_path.replace(from_lock_type, 'gcp')
+                out_file_path = from_out_file_path.replace(from_lock_type, to_lock_type)
                 os.system('cp %s %s' % (from_out_file_path, out_file_path))
 
 def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_begin_addr, hot_bucket_end_addr):
@@ -114,12 +114,12 @@ def process_gz_file(from_gz_file_path, gz_file_path, lock_base_addr, hot_bucket_
     # Replace the original file with the modified temp file
     print(f"Generated '{gz_file_path}'")
 
-def main(directories):
+def main(directories, to_lock_types):
     # print(directories)
     # return
     ps = []
-    for directory in directories:
-        p = multiprocessing.Process(target=process_directory, args=(directory,))
+    for directory, to_lock_type in zip(directories, to_lock_types):
+        p = multiprocessing.Process(target=process_directory, args=(directory, to_lock_type))
         ps.append(p)
         p.start()
     for p in ps:
@@ -129,6 +129,7 @@ def main(directories):
 
 if __name__ == "__main__":
     directories = []  # Update this list with your directories
+    to_lock_types = []
     for app in workloads:
         for workload in workloads[app]:
             for num_nodes in num_nodess:
@@ -137,4 +138,20 @@ if __name__ == "__main__":
                                     'gcp',
                                     str(num_nodes),
                                     str(num_threads_per_nodes))))
-    main(directories)
+                    to_lock_types.append('gcp')
+                    directories.append(root_path + '_'.join((app, workload,
+                                    'gcp_wo_combined_data_opt',
+                                    str(num_nodes),
+                                    str(num_threads_per_nodes))))
+                    to_lock_types.append('gcp_wo_combined_data_opt')
+                    directories.append(root_path + '_'.join((app, workload,
+                                    'gcp_wo_locality_opt',
+                                    str(num_nodes),
+                                    str(num_threads_per_nodes))))
+                    to_lock_types.append('gcp_wo_locality_opt')
+                    directories.append(root_path + '_'.join((app, workload,
+                                    'gcp_wo_o_opt',
+                                    str(num_nodes),
+                                    str(num_threads_per_nodes))))
+                    to_lock_types.append('gcp_wo_o_opt')
+    main(directories, to_lock_types)
