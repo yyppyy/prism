@@ -30,10 +30,11 @@ num_nodess = [16, 8, 4, 2, 1]
 #               'mcs',
 #             #   'pthread_mutex'
 #               ]
-# lock_types = ['pthread_mutex', ]
+# from_lock_type = 'percpu'
+# from_lock_type = 'pthread_mutex'
 from_lock_type = 'pthread_rwlock_prefer_w'
-# lock_types = ['mcs', ]
-# lock_types = ['cohort_rw_spin_mutex', ]
+# from_lock_type = 'mcs'
+# from_lock_type = 'cohort_rw_spin_mutex'
 
 def process_directory(directory):
     # Backup the directory
