@@ -7,31 +7,27 @@ import shlex
 import os
 
 running_procs = []
-MAX_PROCS = 1
+MAX_PROCS = 60
 total_procs = 0
 
-bin_dir = '/home/yanpeng/mind_internal/mind_linux/test_programs/07_lock_micro_benchmark/bin/'
+bin_dir = '/home/yanpeng/GCP_gem5/mind_internal/mind_linux/test_programs/07_lock_micro_benchmark/bin/'
 workload_dir = '/home/yanpeng/GCP_gem5/workloads/ycsb_workloads/'
 log_dir_dir = 'log/'
 result_dir_dir = 'result/'
 
-# workloads = {
-#     'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
-#     # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
-# }
 workloads = {
-    'kvs' : ['run_workloada.dat', ],
+    'kvs' : ['run_workloadd.dat', 'run_workloade.dat', 'run_workloadf.dat'],
 }
 # workloads = {
-#     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
+#     'kvs' : ['run_workloadd.dat'],
 # }
 
 num_threads_per_nodess = [8, ]
 # num_threads_per_nodess = [8, ]
 
 # num_nodess = [16, ]
-# num_nodess = [16, 8, 4, 2, 1]
-num_nodess = [4, ]
+num_nodess = [16, 8, 4, 2, 1]
+# num_nodess = [1, ]
 
 num_lockss = [80, ]
 

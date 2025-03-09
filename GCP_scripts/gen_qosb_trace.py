@@ -6,7 +6,7 @@ import multiprocessing
 root_path = '/home/yanpeng/GCP_gem5/prism/GCP_scripts/result/'
 
 workloads = {
-    'kvs' : ['run_workloada.dat', 'run_workloadb.dat', 'run_workloadc.dat'],
+    'kvs' : ['run_workloadd.dat', 'run_workloade.dat', 'run_workloadf.dat'],
     # 'kc': ['run_workloadl.dat', 'run_workloadh.dat'],
 }
 # workloads = {
