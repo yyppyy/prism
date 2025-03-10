@@ -179,7 +179,7 @@ workloads = {
     'kvs' : ['run_workloadd.dat', 'run_workloade.dat', 'run_workloadf.dat'],
 }
 # workloads = {
-#     'kvs' : ['run_workloadd.dat', ],
+#     'kvs' : ['run_workloade.dat', 'run_workloadf.dat'],
 # }
 
 num_threads_per_nodess = [8, ]
@@ -190,7 +190,7 @@ num_nodess = [16, 8, 4, 2, 1]
 # num_nodess = [1, ]
 
 lock_types = [
-            'pthread_rwlock_prefer_w',
+            # 'pthread_rwlock_prefer_w',
               'percpu',
               'cohort_rw_spin_mutex',
               'mcs',

@@ -7,7 +7,7 @@ import shlex
 import os
 
 running_procs = []
-MAX_PROCS = 60
+MAX_PROCS = 1
 total_procs = 0
 
 bin_dir = '/home/yanpeng/GCP_gem5/mind_internal/mind_linux/test_programs/07_lock_micro_benchmark/bin/'
@@ -19,7 +19,7 @@ workloads = {
     'kvs' : ['run_workloadd.dat', 'run_workloade.dat', 'run_workloadf.dat'],
 }
 # workloads = {
-#     'kvs' : ['run_workloadd.dat'],
+#     'kvs' : ['run_workloade.dat', 'run_workloadf.dat'],
 # }
 
 num_threads_per_nodess = [8, ]
@@ -31,7 +31,9 @@ num_nodess = [16, 8, 4, 2, 1]
 
 num_lockss = [80, ]
 
-lock_types = ['pthread_rwlock_prefer_w', 'percpu', 'cohort_rw_spin_mutex', 'mcs',
+lock_types = [
+    # 'pthread_rwlock_prefer_w',
+              'percpu', 'cohort_rw_spin_mutex', 'mcs',
             #   'pthread_mutex'
               ]
 # lock_types = ['pthread_mutex', ]

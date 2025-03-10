@@ -13,7 +13,7 @@ workloads = {
 #     'kvs' : ['run_workloada.dat', ],
 # }
 # workloads = {
-#     'kvs' : ['run_workloadb.dat', 'run_workloadc.dat'],
+#     'kvs' : ['run_workloade.dat', 'run_workloadf.dat'],
 # }
 
 num_threads_per_nodess = [8, ]
